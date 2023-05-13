@@ -44,7 +44,7 @@ def evaluate_model(model, testRatings, testNegatives, K, num_thread):
         ndcgs = [r[1] for r in res]
         return (hits, ndcgs)
     # Single thread
-    for idx in xrange(len(_testRatings)):
+    for idx in range(len(_testRatings)):
         (hr,ndcg) = eval_one_rating(idx)
         hits.append(hr)
         ndcgs.append(ndcg)      
@@ -61,7 +61,7 @@ def eval_one_rating(idx):
     users = np.full(len(items), u, dtype = 'int32')
     predictions = _model.predict([users, np.array(items)], 
                                  batch_size=100, verbose=0)
-    for i in xrange(len(items)):
+    for i in range(len(items)):
         item = items[i]
         map_item_score[item] = predictions[i]
     items.pop()
@@ -73,13 +73,34 @@ def eval_one_rating(idx):
     return (hr, ndcg)
 
 def getHitRatio(ranklist, gtItem):
+    """
+    The function calculates the hit ratio of a given item in a list of ranked items.
+    
+    :param ranklist: a list of recommended items, ordered by relevance or predicted preference
+    :param gtItem: The ground truth item that we are trying to predict whether it appears in the
+    ranklist or not
+    :return: either 1 or 0, depending on whether the `gtItem` is present in the `ranklist`. If it is
+    present, the function returns 1, indicating a hit. If it is not present, the function returns 0,
+    indicating a miss.
+    """
     for item in ranklist:
         if item == gtItem:
             return 1
     return 0
 
 def getNDCG(ranklist, gtItem):
-    for i in xrange(len(ranklist)):
+    """
+    The function calculates the normalized discounted cumulative gain (NDCG) of a ranked list of items
+    with respect to a ground truth item.
+    
+    :param ranklist: a list of recommended items in descending order of relevance or preference
+    :param gtItem: gtItem is the ground truth item that we are interested in measuring the relevance of
+    in the ranking list
+    :return: the NDCG (Normalized Discounted Cumulative Gain) score of a given ranklist with respect to
+    a ground truth item. If the ground truth item is not present in the ranklist, the function returns
+    0.
+    """
+    for i in range(len(ranklist)):
         item = ranklist[i]
         if item == gtItem:
             return math.log(2) / math.log(i+2)
